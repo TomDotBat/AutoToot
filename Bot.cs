@@ -47,8 +47,16 @@ public class Bot
         _playNote = type.GetMethod("playNote", BindingFlags.NonPublic | BindingFlags.Instance);
         _stopNote = type.GetMethod("stopNote", BindingFlags.NonPublic | BindingFlags.Instance);
 
-        _humanPuppetController = type.GetField("puppet_humanc", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(_gameController) as HumanPuppetController;
-        _doPuppetControl = typeof(HumanPuppetController).GetMethod("doPuppetControl", BindingFlags.Public | BindingFlags.Instance);
+        FieldInfo puppetField = type.GetField("puppet_humanc", BindingFlags.NonPublic | BindingFlags.Instance);
+        if (puppetField == null)
+        {
+            Logger.LogError("Unable to retrieve HumanPuppetController, the character will not move.");
+        }
+        else
+        {
+            _humanPuppetController = puppetField.GetValue(_gameController) as HumanPuppetController;
+            _doPuppetControl = typeof(HumanPuppetController).GetMethod("doPuppetControl", BindingFlags.Public | BindingFlags.Instance);
+        }
 
         Logger.LogDebug("Captured necessary private GameController methods.");
         
@@ -109,12 +117,7 @@ public class Bot
             isPlaying = false;
         }
 
-        // Pretty sure this never changes based on resolution
-        float gameCanvasSize = 450f;
-
-        float reconstructedMousePosition = -anchoredPosition.y / gameCanvasSize * 2;
-
-        DoPuppetControl(reconstructedMousePosition);
+        DoPuppetControl(-anchoredPosition.y / GameCanvasSize * 2);
     }
 
     private void SetPuppetShake(bool state)
@@ -131,12 +134,15 @@ public class Bot
     {
         _stopNote.Invoke(_gameController, _noArgs);
     }
-
+    
     private void DoPuppetControl(float vp)
     {
-        _doPuppetControl.Invoke(_humanPuppetController, new object[] { vp });
+        if (_doPuppetControl != null)
+        {
+            _doPuppetControl.Invoke(_humanPuppetController, new object[] {vp});
+        }
     }
-    
+
     private float EaseInOutVal(float t, float b, float c, float d) //Pasted from dotpeek
     {
         t /= d / 2f;
@@ -161,6 +167,8 @@ public class Bot
 
     private const int EarlyStart = 8;
     private const int LateFinish = 8;
+    
+    private const float GameCanvasSize = 450f;
     
     private const string NotesHolderPath = "GameplayCanvas/GameSpace/NotesHolder";
     private const string CursorPath = "GameplayCanvas/GameSpace/TargetNote";
