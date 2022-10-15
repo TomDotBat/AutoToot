@@ -46,7 +46,10 @@ public class Bot
         _setPuppetShake = type.GetMethod("setPuppetShake", BindingFlags.NonPublic | BindingFlags.Instance);
         _playNote = type.GetMethod("playNote", BindingFlags.NonPublic | BindingFlags.Instance);
         _stopNote = type.GetMethod("stopNote", BindingFlags.NonPublic | BindingFlags.Instance);
-        
+
+        _humanPuppetController = type.GetField("puppet_humanc", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(_gameController) as HumanPuppetController;
+        _doPuppetControl = typeof(HumanPuppetController).GetMethod("doPuppetControl", BindingFlags.Public | BindingFlags.Instance);
+
         Logger.LogDebug("Captured necessary private GameController methods.");
         
         //Fetch important GameObjects
@@ -105,6 +108,13 @@ public class Bot
             StopNote();
             isPlaying = false;
         }
+
+        // Pretty sure this never changes based on resolution
+        float gameCanvasSize = 450f;
+
+        float reconstructedMousePosition = -anchoredPosition.y / gameCanvasSize * 2;
+
+        DoPuppetControl(reconstructedMousePosition);
     }
 
     private void SetPuppetShake(bool state)
@@ -121,6 +131,11 @@ public class Bot
     {
         _stopNote.Invoke(_gameController, _noArgs);
     }
+
+    private void DoPuppetControl(float vp)
+    {
+        _doPuppetControl.Invoke(_humanPuppetController, new object[] { vp });
+    }
     
     private float EaseInOutVal(float t, float b, float c, float d) //Pasted from dotpeek
     {
@@ -133,13 +148,15 @@ public class Bot
     private ManualLogSource Logger => Plugin.Logger;
 
     private readonly GameController _gameController;
+    private readonly HumanPuppetController _humanPuppetController;
     private readonly GameObject _noteHolder;
     private readonly GameObject _pointer;
 
     private readonly MethodInfo _setPuppetShake;
     private readonly MethodInfo _playNote;
     private readonly MethodInfo _stopNote;
-    
+    private readonly MethodInfo _doPuppetControl;
+
     private readonly object[] _noArgs = {};
 
     private const int EarlyStart = 8;
