@@ -40,7 +40,7 @@ internal class GameControllerUpdatePatch
         float ___currentnotestart, float ___currentnoteend, float ___currentnotepshift,
         ref bool ___noteplaying)
     {
-        if (!Plugin.IsInGameplay)
+        if (__instance.freeplay || !Plugin.IsInGameplay)
             return true;
 
         if (Input.GetKeyDown(KeyCode.F8))
