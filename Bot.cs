@@ -46,6 +46,7 @@ public class Bot
         _setPuppetShake = type.GetMethod("setPuppetShake", BindingFlags.NonPublic | BindingFlags.Instance);
         _playNote = type.GetMethod("playNote", BindingFlags.NonPublic | BindingFlags.Instance);
         _stopNote = type.GetMethod("stopNote", BindingFlags.NonPublic | BindingFlags.Instance);
+        _outOfBreath = type.GetField("outofbreath", BindingFlags.NonPublic | BindingFlags.Instance);
 
         FieldInfo puppetField = type.GetField("puppet_humanc", BindingFlags.NonPublic | BindingFlags.Instance);
         if (puppetField == null)
@@ -101,7 +102,8 @@ public class Bot
         pointerRectTransform.anchoredPosition = anchoredPosition;
         
         //Handle whether or not we should be tooting
-        bool shouldToot = time >= noteStartTime - EarlyStart
+        bool shouldToot = !IsOutOfBreath()
+                          && time >= noteStartTime - EarlyStart
                           && time <= noteEndTime + LateFinish;
         
         if (!isPlaying && shouldToot)
@@ -143,6 +145,11 @@ public class Bot
         }
     }
 
+    private bool IsOutOfBreath()
+    {
+        return (bool) _outOfBreath.GetValue(_gameController);
+    }
+    
     private float EaseInOutVal(float t, float b, float c, float d) //Pasted from dotpeek
     {
         t /= d / 2f;
@@ -162,6 +169,7 @@ public class Bot
     private readonly MethodInfo _playNote;
     private readonly MethodInfo _stopNote;
     private readonly MethodInfo _doPuppetControl;
+    private readonly FieldInfo _outOfBreath;
 
     private readonly object[] _noArgs = {};
 
