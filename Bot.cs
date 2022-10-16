@@ -77,7 +77,7 @@ public class Bot
         }
     }
 
-    public void Update(int noteIndex, float noteStartY, float noteStartTime, float noteEndTime, float notePShift, ref bool isPlaying)
+    public void Update(int noteIndex, float noteStartY, float noteEndY, float noteStartTime, float noteEndTime, float notePShift, ref bool isPlaying)
     {
         if (noteIndex < 0)
             return;
@@ -92,25 +92,37 @@ public class Bot
         float noteHolderXPos = noteHolderRectTransform.anchoredPosition3D.x - zeroXPos;
         float time = noteHolderXPos <= 0.0 ? Mathf.Abs(noteHolderXPos) : -1f;
         
-        Vector3 anchoredPosition = pointerRectTransform.anchoredPosition;
-        
-        anchoredPosition.y = noteStartY + EaseInOutVal(
-            Mathf.Abs(1f - (noteEndTime - time) / (noteEndTime - noteStartTime)),
-            0.0f, notePShift, 1f
-        );
-        
-        pointerRectTransform.anchoredPosition = anchoredPosition;
+        noteStartTime -= EarlyStart;
+        noteEndTime += LateFinish;
         
         //Handle whether or not we should be tooting
         bool shouldToot = !IsOutOfBreath()
-                          && time >= noteStartTime - EarlyStart
-                          && time <= noteEndTime + LateFinish;
+                          && time >= noteStartTime
+                          && time <= noteEndTime;
+
+        Vector2 pointerPosition = pointerRectTransform.anchoredPosition;
+
+        if (isPlaying)
+        {
+            pointerPosition.y = noteStartY + EaseInOutVal(
+                Mathf.Abs(1f - (noteEndTime - time) / (noteEndTime - noteStartTime)),
+                0.0f, notePShift, 1f
+            );
+        }
+        else
+        {
+            float progressToNextNote = 1f - (noteStartTime - time) / (noteStartTime - _lastNoteEndTime);
+            pointerPosition.y = Mathf.Lerp( _lastNoteEndY, noteStartY, progressToNextNote);
+        }
         
         if (!isPlaying && shouldToot)
         {
             SetPuppetShake(true);
             PlayNote();
             isPlaying = true;
+            
+            _lastNoteEndTime = noteEndTime;
+            _lastNoteEndY = noteEndY;
         }
         else if (isPlaying && !shouldToot)
         {
@@ -118,8 +130,9 @@ public class Bot
             StopNote();
             isPlaying = false;
         }
-
-        DoPuppetControl(-anchoredPosition.y / GameCanvasSize * 2);
+        
+        pointerRectTransform.anchoredPosition = pointerPosition;
+        DoPuppetControl(-pointerPosition.y / GameCanvasSize * 2);
     }
 
     private void SetPuppetShake(bool state)
@@ -177,7 +190,10 @@ public class Bot
     private const int LateFinish = 8;
     
     private const float GameCanvasSize = 450f;
-    
+
+    private float _lastNoteEndTime;
+    private float _lastNoteEndY;
+
     private const string NotesHolderPath = "GameplayCanvas/GameSpace/NotesHolder";
     private const string CursorPath = "GameplayCanvas/GameSpace/TargetNote";
 }

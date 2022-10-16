@@ -36,7 +36,8 @@ namespace AutoToot.Patches;
 internal class GameControllerUpdatePatch
 {
     static bool Prefix(GameController __instance,
-        int ___currentnoteindex, float ___currentnotestarty, float ___currentnotestart, float ___currentnoteend, float ___currentnotepshift,
+        int ___currentnoteindex, float ___currentnotestarty, float ___currentnoteendy,
+        float ___currentnotestart, float ___currentnoteend, float ___currentnotepshift,
         ref bool ___noteplaying)
     {
         if (!Plugin.IsInGameplay)
@@ -57,7 +58,8 @@ internal class GameControllerUpdatePatch
             {
                 Plugin.Bot.Update(
                     ___currentnoteindex, 
-                    ___currentnotestarty, ___currentnotestart, ___currentnoteend, ___currentnotepshift,
+                    ___currentnotestarty, ___currentnoteendy, 
+                    ___currentnotestart, ___currentnoteend, ___currentnotepshift,
                     ref ___noteplaying
                 );
             }
