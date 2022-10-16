@@ -61,6 +61,7 @@ public class Plugin : BaseUnityPlugin
         {
             Logger.LogInfo("Gameplay scene loaded.");
             IsInGameplay = true;
+            WasAutoUsed = false;
         }
         else if (IsInGameplay)
         {
@@ -76,8 +77,13 @@ public class Plugin : BaseUnityPlugin
         get => _isActive;
         set
         {
-            _isActive = value;
-            Logger.LogInfo($"{(_isActive ? "Enabled" : "Disabled")} Auto-Toot.");
+	        if (_isActive != value)
+	        {
+		        _isActive = value;
+		        Logger.LogInfo($"{(_isActive ? "Enabled" : "Disabled")} Auto-Toot.");
+
+		        if (_isActive) WasAutoUsed = true;
+	        }
         }
     }
 
@@ -88,11 +94,13 @@ public class Plugin : BaseUnityPlugin
     
     public static bool IsInGameplay { get; private set; }
     
+    public static bool WasAutoUsed { get; private set; }
+    
     public static Bot Bot { get; internal set; }
     
     internal new static ManualLogSource Logger { get; private set; }
 
-    private static bool _isActive = false;
+    private static bool _isActive;
     
     private const string GameplaySceneName = "gameplay";
 }
