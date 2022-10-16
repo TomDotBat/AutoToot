@@ -27,10 +27,43 @@
 	Created: 15th October 2022
 */
 
+using AutoToot.Helpers;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace AutoToot.Patches;
+
+[HarmonyPatch(typeof(GameController), "Start")]
+internal class GameControllerStartPatch
+{
+	static void Postfix()
+	{
+		GameObject comboObject = Hierarchy.FindSceneGameObjectByPath(SceneManager.GetActiveScene(), ComboPath);
+		if (comboObject == null)
+		{
+			Plugin.Logger.LogError("Unable to find combo text, the auto toot indicator will not be present.");
+		}
+		else
+		{
+			GameObject autoIndicator = Object.Instantiate(comboObject, comboObject.transform);
+			autoIndicator.AddComponent<AutoIndicator>();
+
+			GameObject parent = Hierarchy.FindSceneGameObjectByPath(SceneManager.GetActiveScene(), ParentPath);
+			if (parent == null)
+			{
+				Plugin.Logger.LogError("Unable to find the UIHolder to re-parent the indicator, placement may be wrong.");
+			}
+			else
+			{
+				autoIndicator.transform.parent = parent.transform;
+			}
+		}
+	}
+
+	private const string ComboPath = "GameplayCanvas/UIHolder/maxcombo/maxcombo_shadow";
+	private const string ParentPath = "GameplayCanvas/UIHolder";
+}
 
 [HarmonyPatch(typeof(GameController), "Update")]
 internal class GameControllerUpdatePatch
