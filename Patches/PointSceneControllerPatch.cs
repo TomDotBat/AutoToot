@@ -28,7 +28,11 @@
 */
 
 using System.Reflection;
+using AutoToot.Helpers;
 using HarmonyLib;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace AutoToot.Patches;
 
@@ -62,21 +66,50 @@ internal class PointSceneControllerAchievementsCheckPatch
 [HarmonyPatch(typeof(PointSceneController), "doCoins")]
 internal class PointSceneControllerDoCoinsPatch
 {
-    static bool Prefix(PointSceneController __instance)
+    static void Postfix(PointSceneController __instance)
     {
-        if (Plugin.WasAutoUsed)
+	    if (!Plugin.WasAutoUsed)
+		    return;
+    
+        Scene activeScene = SceneManager.GetActiveScene();
+        
+        GameObject coin = Hierarchy.FindSceneGameObjectByPath(activeScene, CoinPath);
+        if (coin == null)
         {
-            MethodInfo invoke = typeof(PointSceneController).GetMethod("Invoke", BindingFlags.Public | BindingFlags.Instance);
-            
-            if (invoke != null)
-            {
-                invoke.Invoke(__instance, new object[] {"showContinue", 0.75f});
-                return false;
-            }
-            
-            Plugin.Logger.LogError("Failed to retrieve Invoke method from PointSceneController.");
+	        Plugin.Logger.LogError("Unable to find toots coin, it may be visible still.");
+        }
+        else
+        {
+	        coin.SetActive(false);
         }
         
-        return true;
+        //Many sacrifices were made to make this to compile
+        GameObject tootsObject = Hierarchy.FindSceneGameObjectByPath(activeScene, TootsTextPath);
+        if (tootsObject == null)
+        {
+	        Plugin.Logger.LogError("Unable to find toots text, AutoToot indicator will not be present.");
+        }
+        else
+        {
+	        __instance.tootstext.text = "AutoTooted Play";
+	        
+	        Vector3 textPosition = tootsObject.transform.position;
+	        textPosition.x = TootsTextXPosition;
+	        tootsObject.transform.position = textPosition;
+        }
+        
+        MethodInfo invoke = typeof(PointSceneController).GetMethod("Invoke", BindingFlags.Public | BindingFlags.Instance);
+        if (invoke == null)
+        {
+	        Plugin.Logger.LogError("Failed to retrieve Invoke method from PointSceneController.");
+        }
+        else
+        {
+	        invoke.Invoke(__instance, new object[] {"showContinue", 0.75f});
+        }
     }
+
+    private const string CoinPath = "Canvas/coins+continue/coingroup/coin";
+    private const string TootsTextPath = "Canvas/coins+continue/coingroup/Text";
+    private const float TootsTextXPosition = -0.246f;
 }
