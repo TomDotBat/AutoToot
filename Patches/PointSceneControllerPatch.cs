@@ -27,12 +27,10 @@
 	Created: 16th October 2022
 */
 
-using System.Reflection;
 using AutoToot.Helpers;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 namespace AutoToot.Patches;
 
@@ -98,15 +96,7 @@ internal class PointSceneControllerDoCoinsPatch
 	        tootsObject.transform.position = textPosition;
         }
         
-        MethodInfo invoke = typeof(PointSceneController).GetMethod("Invoke", BindingFlags.Public | BindingFlags.Instance);
-        if (invoke == null)
-        {
-	        Plugin.Logger.LogError("Failed to retrieve Invoke method from PointSceneController.");
-        }
-        else
-        {
-	        invoke.Invoke(__instance, new object[] {"showContinue", 0.75f});
-        }
+        __instance.Invoke("showContinue",  0.75f);
     }
 
     private const string CoinPath = "Canvas/coins+continue/coingroup/coin";

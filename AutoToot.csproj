@@ -4,7 +4,7 @@
         <AssemblyName>AutoToot</AssemblyName>
         <Description>Auto play for Trombone Champ.</Description>
         <Version>1.1.0</Version>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
         <LangVersion>latest</LangVersion>
         <PackageId>Tom.AutoToot</PackageId>
         <Title>AutoToot</Title>
@@ -12,10 +12,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
         <PackageReference Include="BepInEx.Core" Version="5.*" />
+        <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
         <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
-        <PackageReference Include="UnityEngine.Modules" Version="5.6.0" IncludeAssets="compile" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
@@ -29,8 +28,14 @@
         <Reference Include="Assembly-CSharp">
             <HintPath>C:\Program Files (x86)\Steam\steamapps\common\TromboneChamp\TromboneChamp_Data\Managed\Assembly-CSharp.dll</HintPath>
         </Reference>
-        <Reference Include="Assembly-CSharp-firstpass">
-            <HintPath>C:\Program Files (x86)\Steam\steamapps\common\TromboneChamp\TromboneChamp_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+        <Reference Include="UnityEngine">
+          <HintPath>C:\Program Files (x86)\Steam\steamapps\common\TromboneChamp\TromboneChamp_Data\Managed\UnityEngine.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+          <HintPath>C:\Program Files (x86)\Steam\steamapps\common\TromboneChamp\TromboneChamp_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.InputLegacyModule">
+          <HintPath>C:\Program Files (x86)\Steam\steamapps\common\TromboneChamp\TromboneChamp_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
         </Reference>
         <Reference Include="UnityEngine.UI">
           <HintPath>C:\Program Files (x86)\Steam\steamapps\common\TromboneChamp\TromboneChamp_Data\Managed\UnityEngine.UI.dll</HintPath>

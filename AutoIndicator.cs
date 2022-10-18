@@ -45,15 +45,19 @@ public class AutoIndicator : MonoBehaviour
         _foregroundText = transform.Find(ForegroundObjectName).GetComponent<Text>();
         _shadowText = GetComponent<Text>();
 
-        _foregroundText.text = "";
-        _shadowText.text = "";
+        _foregroundText.text = IndicatorText;
+        _shadowText.text = IndicatorText;
     }
 
     private void Update()
     {
         bool shouldShow = Plugin.IsActive;
-        _foregroundText.text = shouldShow ? IndicatorText : "";
-        _shadowText.text = shouldShow ? IndicatorText : "";
+        
+        if (_foregroundText.enabled != shouldShow)
+        {
+	        _foregroundText.enabled = shouldShow;
+	        _shadowText.enabled = shouldShow;
+        }
     }
 
     private const string GameObjectName = "AutoToot Indicator";

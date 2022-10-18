@@ -42,7 +42,7 @@ public class Bot
     {
         _gameController = gameController;
         
-        Type type = ((object) gameController).GetType(); //Removing the type cast will anger the compiler!!!
+        Type type = typeof(GameController);
         _setPuppetShake = type.GetMethod("setPuppetShake", BindingFlags.NonPublic | BindingFlags.Instance);
         _playNote = type.GetMethod("playNote", BindingFlags.NonPublic | BindingFlags.Instance);
         _stopNote = type.GetMethod("stopNote", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -56,7 +56,6 @@ public class Bot
         else
         {
             _humanPuppetController = puppetField.GetValue(_gameController) as HumanPuppetController;
-            _doPuppetControl = typeof(HumanPuppetController).GetMethod("doPuppetControl", BindingFlags.Public | BindingFlags.Instance);
         }
 
         Logger.LogDebug("Captured necessary private GameController methods.");
@@ -152,10 +151,7 @@ public class Bot
     
     private void DoPuppetControl(float vp)
     {
-        if (_doPuppetControl != null)
-        {
-            _doPuppetControl.Invoke(_humanPuppetController, new object[] {vp});
-        }
+        _humanPuppetController.doPuppetControl(vp);
     }
 
     private bool IsOutOfBreath()
@@ -181,7 +177,6 @@ public class Bot
     private readonly MethodInfo _setPuppetShake;
     private readonly MethodInfo _playNote;
     private readonly MethodInfo _stopNote;
-    private readonly MethodInfo _doPuppetControl;
     private readonly FieldInfo _outOfBreath;
 
     private readonly object[] _noArgs = {};
