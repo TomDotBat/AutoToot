@@ -43,26 +43,21 @@ internal class PointSceneControllerStartPatch
 {
     static void Prefix()
     {
-        if (Plugin.WasAutoUsed) --GlobalVariables.localsave.tracks_played;
+        if (Plugin.WasAutoUsed)
+	        --GlobalVariables.localsave.tracks_played;
     }
 }
 
 [HarmonyPatch(typeof(PointSceneController), nameof(PointSceneController.updateSave))]
 internal class PointSceneControllerUpdateSavePatch
 {
-    static bool Prefix()
-    {
-        return !Plugin.WasAutoUsed;
-    }
+    static bool Prefix() => !Plugin.WasAutoUsed;
 }
 
 [HarmonyPatch(typeof(PointSceneController), nameof(PointSceneController.checkScoreCheevos))]
 internal class PointSceneControllerAchievementsCheckPatch
 {
-    static bool Prefix()
-    {
-        return !Plugin.WasAutoUsed;
-    }
+    static bool Prefix() => !Plugin.WasAutoUsed;
 }
 
 [HarmonyPatch(typeof(PointSceneController), nameof(PointSceneController.doCoins))]
