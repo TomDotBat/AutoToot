@@ -27,14 +27,18 @@
 	Created: 16th October 2022
 */
 
+using System.Security.Permissions;
 using AutoToot.Helpers;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+#pragma warning disable CS0618
+[assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
+
 namespace AutoToot.Patches;
 
-[HarmonyPatch(typeof(PointSceneController), "Start")]
+[HarmonyPatch(typeof(PointSceneController), nameof(PointSceneController.Start))]
 internal class PointSceneControllerStartPatch
 {
     static void Prefix()
@@ -43,7 +47,7 @@ internal class PointSceneControllerStartPatch
     }
 }
 
-[HarmonyPatch(typeof(PointSceneController), "updateSave")]
+[HarmonyPatch(typeof(PointSceneController), nameof(PointSceneController.updateSave))]
 internal class PointSceneControllerUpdateSavePatch
 {
     static bool Prefix()
@@ -52,7 +56,7 @@ internal class PointSceneControllerUpdateSavePatch
     }
 }
 
-[HarmonyPatch(typeof(PointSceneController), "checkScoreCheevos")]
+[HarmonyPatch(typeof(PointSceneController), nameof(PointSceneController.checkScoreCheevos))]
 internal class PointSceneControllerAchievementsCheckPatch
 {
     static bool Prefix()
@@ -61,7 +65,7 @@ internal class PointSceneControllerAchievementsCheckPatch
     }
 }
 
-[HarmonyPatch(typeof(PointSceneController), "doCoins")]
+[HarmonyPatch(typeof(PointSceneController), nameof(PointSceneController.doCoins))]
 internal class PointSceneControllerDoCoinsPatch
 {
     static void Postfix(PointSceneController __instance)
@@ -80,8 +84,7 @@ internal class PointSceneControllerDoCoinsPatch
         {
 	        coin.SetActive(false);
         }
-        
-        //Many sacrifices were made to make this to compile
+
         GameObject tootsObject = Hierarchy.FindSceneGameObjectByPath(activeScene, TootsTextPath);
         if (tootsObject == null)
         {
@@ -96,7 +99,7 @@ internal class PointSceneControllerDoCoinsPatch
 	        tootsObject.transform.position = textPosition;
         }
         
-        __instance.Invoke("showContinue",  0.75f);
+        __instance.Invoke(nameof(PointSceneController.showContinue),  0.75f);
     }
 
     private const string CoinPath = "Canvas/coins+continue/coingroup/coin";

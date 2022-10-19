@@ -27,10 +27,14 @@
 	Created: 15th October 2022
 */
 
+using System.Security.Permissions;
 using AutoToot.Helpers;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+
+#pragma warning disable CS0618
+[assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
 
 namespace AutoToot.Patches;
 
@@ -65,13 +69,10 @@ internal class GameControllerStartPatch
 	private const string ParentPath = "GameplayCanvas/UIHolder";
 }
 
-[HarmonyPatch(typeof(GameController), "Update")]
+[HarmonyPatch(typeof(GameController), nameof(GameController.Update))]
 internal class GameControllerUpdatePatch
 {
-    static bool Prefix(GameController __instance,
-        int ___currentnoteindex, float ___currentnotestarty, float ___currentnoteendy,
-        float ___currentnotestart, float ___currentnoteend, float ___currentnotepshift,
-        ref bool ___noteplaying)
+    static bool Prefix(GameController __instance)
     {
         if (__instance.freeplay || !Plugin.IsInGameplay)
             return true;
@@ -89,12 +90,7 @@ internal class GameControllerUpdatePatch
             }
             else
             {
-                Plugin.Bot.Update(
-                    ___currentnoteindex, 
-                    ___currentnotestarty, ___currentnoteendy, 
-                    ___currentnotestart, ___currentnoteend, ___currentnotepshift,
-                    ref ___noteplaying
-                );
+                Plugin.Bot.Update();
             }
         }
 

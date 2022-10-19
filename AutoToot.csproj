@@ -26,7 +26,7 @@
             <HintPath>C:\Program Files (x86)\Steam\steamapps\common\TromboneChamp\BepInEx\core\0Harmony.dll</HintPath>
         </Reference>
         <Reference Include="Assembly-CSharp">
-            <HintPath>C:\Program Files (x86)\Steam\steamapps\common\TromboneChamp\TromboneChamp_Data\Managed\Assembly-CSharp.dll</HintPath>
+          <HintPath>C:\Program Files (x86)\Steam\steamapps\common\TromboneChamp\TromboneChamp_Data\Managed\Assembly-CSharp-nstrip.dll</HintPath>
         </Reference>
         <Reference Include="UnityEngine">
           <HintPath>C:\Program Files (x86)\Steam\steamapps\common\TromboneChamp\TromboneChamp_Data\Managed\UnityEngine.dll</HintPath>

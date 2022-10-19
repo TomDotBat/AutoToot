@@ -27,12 +27,14 @@
 	Created: 15th October 2022
 */
 
-using System;
-using System.Reflection;
+using System.Security.Permissions;
 using AutoToot.Helpers;
 using BepInEx.Logging;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+
+#pragma warning disable CS0618
+[assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
 
 namespace AutoToot;
 
@@ -41,124 +43,81 @@ public class Bot
     public Bot(GameController gameController)
     {
         _gameController = gameController;
-        
-        Type type = typeof(GameController);
-        _setPuppetShake = type.GetMethod("setPuppetShake", BindingFlags.NonPublic | BindingFlags.Instance);
-        _playNote = type.GetMethod("playNote", BindingFlags.NonPublic | BindingFlags.Instance);
-        _stopNote = type.GetMethod("stopNote", BindingFlags.NonPublic | BindingFlags.Instance);
-        _outOfBreath = type.GetField("outofbreath", BindingFlags.NonPublic | BindingFlags.Instance);
+        _humanPuppetController = gameController.puppet_humanc;
 
-        FieldInfo puppetField = type.GetField("puppet_humanc", BindingFlags.NonPublic | BindingFlags.Instance);
-        if (puppetField == null)
-        {
-            Logger.LogError("Unable to retrieve HumanPuppetController, the character will not move.");
-        }
-        else
-        {
-            _humanPuppetController = puppetField.GetValue(_gameController) as HumanPuppetController;
-        }
-
-        Logger.LogDebug("Captured necessary private GameController methods.");
-        
-        //Fetch important GameObjects
         Scene activeScene = SceneManager.GetActiveScene();
         _noteHolder = Hierarchy.FindSceneGameObjectByPath(activeScene, NotesHolderPath);
         _pointer = Hierarchy.FindSceneGameObjectByPath(activeScene, CursorPath);
 
         if (_noteHolder == null || _pointer == null)
         {
-            Logger.LogError("Unable to locate the NotesHolder and TargetNote, Auto-Toot cannot function.");
+            Logger.LogError("Unable to locate the NotesHolder and Pointer, Auto-Toot cannot function.");
             Plugin.IsActive = false;
         }
         else
         {
-            Logger.LogDebug("Located NotesHolder and TargetNote.");
+            Logger.LogDebug("Located NotesHolder and Pointer.");
         }
     }
 
-    public void Update(int noteIndex, float noteStartY, float noteEndY, float noteStartTime, float noteEndTime, float notePShift, ref bool isPlaying)
+    public void Update()
     {
-        if (noteIndex < 0)
+        if (_gameController.currentnoteindex < 0)
             return;
-        
+
         RectTransform noteHolderRectTransform = _noteHolder.GetComponent<RectTransform>();
         RectTransform pointerRectTransform = _pointer.GetComponent<RectTransform>();
         if (noteHolderRectTransform == null || pointerRectTransform == null)
             return;
-        
+
         //The following code determines where the pointer should be based on decompiled code
         float zeroXPos = 60f;
         float noteHolderXPos = noteHolderRectTransform.anchoredPosition3D.x - zeroXPos;
         float time = noteHolderXPos <= 0.0 ? Mathf.Abs(noteHolderXPos) : -1f;
-        
-        noteStartTime -= EarlyStart;
-        noteEndTime += LateFinish;
+
+        float noteStartTime = _gameController.currentnotestart - EarlyStart;
+        float noteEndTime = _gameController.currentnoteend + LateFinish;
         
         //Handle whether or not we should be tooting
-        bool shouldToot = !IsOutOfBreath()
+        bool shouldToot = !_gameController.outofbreath
                           && time >= noteStartTime
                           && time <= noteEndTime;
 
         Vector2 pointerPosition = pointerRectTransform.anchoredPosition;
 
-        if (isPlaying)
+        if (_gameController.noteplaying)
         {
-            pointerPosition.y = noteStartY + EaseInOutVal(
+            pointerPosition.y = _gameController.currentnotestarty + EaseInOutVal(
                 Mathf.Abs(1f - (noteEndTime - time) / (noteEndTime - noteStartTime)),
-                0.0f, notePShift, 1f
+                0.0f, _gameController.currentnotepshift, 1f
             );
         }
         else
         {
             float progressToNextNote = 1f - (noteStartTime - time) / (noteStartTime - _lastNoteEndTime);
-            pointerPosition.y = Mathf.Lerp( _lastNoteEndY, noteStartY, progressToNextNote);
+            pointerPosition.y = Mathf.Lerp( _lastNoteEndY, _gameController.currentnotestarty, progressToNextNote);
         }
         
-        if (!isPlaying && shouldToot)
+        if (!_gameController.noteplaying && shouldToot)
         {
-            SetPuppetShake(true);
-            PlayNote();
-            isPlaying = true;
+            _gameController.setPuppetShake(true);
+            _gameController.playNote();
+            _gameController.noteplaying = true;
             
             _lastNoteEndTime = noteEndTime;
-            _lastNoteEndY = noteEndY;
+            _lastNoteEndY = _gameController.currentnoteendy;
         }
-        else if (isPlaying && !shouldToot)
+        else if (_gameController.noteplaying && !shouldToot)
         {
-            SetPuppetShake(false);
-            StopNote();
-            isPlaying = false;
+            _gameController.setPuppetShake(false);
+            _gameController.stopNote();
+            _gameController.noteplaying = false;
         }
         
         pointerRectTransform.anchoredPosition = pointerPosition;
-        DoPuppetControl(-pointerPosition.y / GameCanvasSize * 2);
+        _humanPuppetController.doPuppetControl(-pointerPosition.y / GameCanvasSize * 2);
     }
 
-    private void SetPuppetShake(bool state)
-    {
-        _setPuppetShake.Invoke(_gameController, new object[] {state});
-    }
-
-    private void PlayNote()
-    {
-        _playNote.Invoke(_gameController, _noArgs);
-    }
-    
-    private void StopNote()
-    {
-        _stopNote.Invoke(_gameController, _noArgs);
-    }
-    
-    private void DoPuppetControl(float vp)
-    {
-        _humanPuppetController.doPuppetControl(vp);
-    }
-
-    private bool IsOutOfBreath()
-    {
-        return (bool) _outOfBreath.GetValue(_gameController);
-    }
-    
     private float EaseInOutVal(float t, float b, float c, float d) //Pasted from dotpeek
     {
         t /= d / 2f;
@@ -173,13 +132,6 @@ public class Bot
     private readonly HumanPuppetController _humanPuppetController;
     private readonly GameObject _noteHolder;
     private readonly GameObject _pointer;
-
-    private readonly MethodInfo _setPuppetShake;
-    private readonly MethodInfo _playNote;
-    private readonly MethodInfo _stopNote;
-    private readonly FieldInfo _outOfBreath;
-
-    private readonly object[] _noArgs = {};
 
     private const int EarlyStart = 8;
     private const int LateFinish = 8;
