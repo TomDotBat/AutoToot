@@ -59,13 +59,13 @@ public class Plugin : BaseUnityPlugin
         if (scene.name == GameplaySceneName)
         {
             Logger.LogInfo("Gameplay scene loaded.");
-            IsInGameplay = true;
+            _isInGameplay = true;
             WasAutoUsed = false;
         }
-        else if (IsInGameplay)
+        else if (_isInGameplay)
         {
             Logger.LogInfo("Gameplay scene unloaded.");
-            IsInGameplay = false;
+            _isInGameplay = false;
             IsActive = false;
             Bot = null;
         }
@@ -91,8 +91,6 @@ public class Plugin : BaseUnityPlugin
         IsActive = !_isActive;
     }
     
-    public static bool IsInGameplay { get; private set; }
-    
     public static bool WasAutoUsed { get; private set; }
     
     public static Bot Bot { get; internal set; }
@@ -100,6 +98,7 @@ public class Plugin : BaseUnityPlugin
     internal new static ManualLogSource Logger { get; private set; }
 
     private static bool _isActive;
+    private static bool _isInGameplay;
     
     private const string GameplaySceneName = "gameplay";
 }
