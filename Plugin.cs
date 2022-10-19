@@ -89,7 +89,6 @@ public class Plugin : BaseUnityPlugin
 		    else
 		    {
 			    Bot = new Bot(gameController);
-			    gameController.controllermode = true;
 		    }
 	    }
     }

@@ -86,3 +86,12 @@ internal class GameControllerUpdatePatch
         return true;
     }
 }
+
+[HarmonyPatch(typeof(GameController), nameof(GameController.pauseRetryLevel))]
+internal class GameControllerRetryPatch
+{
+	static void Postfix(GameController __instance)
+	{
+		if (Plugin.IsActive) Plugin.IsActive = false;
+	}
+}
