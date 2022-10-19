@@ -56,7 +56,7 @@ public class Plugin : BaseUnityPlugin
             return;
 
         Logger.LogDebug($"Level {scene.buildIndex} ({scene.name}) was loaded.");
-        
+
         if (scene.name == GameplaySceneName)
         {
             Logger.LogInfo("Gameplay scene loaded.");
