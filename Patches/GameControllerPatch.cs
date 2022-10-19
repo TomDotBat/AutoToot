@@ -28,10 +28,8 @@
 */
 
 using System.Security.Permissions;
-using AutoToot.Helpers;
 using HarmonyLib;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 #pragma warning disable CS0618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -43,7 +41,7 @@ internal class GameControllerStartPatch
 {
 	static void Postfix()
 	{
-		GameObject comboObject = Hierarchy.FindSceneGameObjectByPath(SceneManager.GetActiveScene(), ComboPath);
+		GameObject comboObject = GameObject.Find(ComboPath);
 		if (comboObject == null)
 		{
 			Plugin.Logger.LogError("Unable to find combo text, the auto toot indicator will not be present.");
@@ -53,7 +51,7 @@ internal class GameControllerStartPatch
 			GameObject autoIndicator = Object.Instantiate(comboObject, comboObject.transform);
 			autoIndicator.AddComponent<AutoIndicator>();
 
-			GameObject parent = Hierarchy.FindSceneGameObjectByPath(SceneManager.GetActiveScene(), ParentPath);
+			GameObject parent = GameObject.Find(ParentPath);
 			if (parent == null)
 			{
 				Plugin.Logger.LogError("Unable to find the UIHolder to re-parent the indicator, placement may be wrong.");

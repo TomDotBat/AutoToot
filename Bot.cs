@@ -28,10 +28,8 @@
 */
 
 using System.Security.Permissions;
-using AutoToot.Helpers;
 using BepInEx.Logging;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 #pragma warning disable CS0618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -45,9 +43,8 @@ public class Bot
         _gameController = gameController;
         _humanPuppetController = gameController.puppet_humanc;
 
-        Scene activeScene = SceneManager.GetActiveScene();
-        _noteHolder = Hierarchy.FindSceneGameObjectByPath(activeScene, NotesHolderPath);
-        _pointer = Hierarchy.FindSceneGameObjectByPath(activeScene, CursorPath);
+        _noteHolder = GameObject.Find(NotesHolderPath);
+        _pointer = GameObject.Find(CursorPath);
 
         if (_noteHolder == null || _pointer == null)
         {

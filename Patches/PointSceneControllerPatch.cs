@@ -28,10 +28,8 @@
 */
 
 using System.Security.Permissions;
-using AutoToot.Helpers;
 using HarmonyLib;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 #pragma warning disable CS0618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -68,9 +66,7 @@ internal class PointSceneControllerDoCoinsPatch
 	    if (!Plugin.WasAutoUsed)
 		    return;
     
-        Scene activeScene = SceneManager.GetActiveScene();
-        
-        GameObject coin = Hierarchy.FindSceneGameObjectByPath(activeScene, CoinPath);
+        GameObject coin = GameObject.Find(CoinPath);
         if (coin == null)
         {
 	        Plugin.Logger.LogError("Unable to find toots coin, it may be visible still.");
@@ -80,7 +76,7 @@ internal class PointSceneControllerDoCoinsPatch
 	        coin.SetActive(false);
         }
 
-        GameObject tootsObject = Hierarchy.FindSceneGameObjectByPath(activeScene, TootsTextPath);
+        GameObject tootsObject = GameObject.Find(TootsTextPath);
         if (tootsObject == null)
         {
 	        Plugin.Logger.LogError("Unable to find toots text, AutoToot indicator will not be present.");
