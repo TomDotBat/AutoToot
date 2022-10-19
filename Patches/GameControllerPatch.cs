@@ -74,7 +74,7 @@ internal class GameControllerUpdatePatch
 {
     static bool Prefix(GameController __instance)
     {
-        if (__instance.freeplay)
+        if (__instance.freeplay || __instance.paused)
             return true;
 
         if (Input.GetKeyDown(KeyCode.F8))
