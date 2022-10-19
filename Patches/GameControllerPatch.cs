@@ -83,16 +83,7 @@ internal class GameControllerUpdatePatch
         __instance.controllermode = Plugin.IsActive; //Disables user input for us, nice shortcut!!
 
         if (Plugin.IsActive)
-        {
-            if (Plugin.Bot == null)
-            {
-                Plugin.Bot = new Bot(__instance);
-            }
-            else
-            {
-                Plugin.Bot.Update();
-            }
-        }
+	        Plugin.Bot.Update();
 
         return true;
     }

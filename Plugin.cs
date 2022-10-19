@@ -27,9 +27,11 @@
 	Created: 15th October 2022
 */
 
+using AutoToot.Helpers;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace AutoToot;
@@ -71,29 +73,51 @@ public class Plugin : BaseUnityPlugin
         }
     }
 
+    private static void SetupBot()
+    {
+	    GameObject gameControllerObject = GameObject.Find(GameControllerPath);
+	    if (gameControllerObject == null)
+	    {
+		    Logger.LogError("Unable to find the GameController object, Auto-Toot cannot function.");
+	    }
+	    else
+	    {
+		    GameController gameController = gameControllerObject.GetComponent<GameController>();
+		    if (gameController == null)
+		    {
+			    Logger.LogError("Unable to retrieve the GameController component, Auto-Toot cannot function.");
+		    }
+		    else
+		    {
+			    Bot = new Bot(gameController);
+			    gameController.controllermode = true;
+		    }
+	    }
+    }
+
+    public static void ToggleActive() => IsActive = !_isActive;
+
     public static bool IsActive
     {
         get => _isActive;
         set
         {
-	        if (_isActive != value)
-	        {
-		        _isActive = value;
-		        Logger.LogInfo($"{(_isActive ? "Enabled" : "Disabled")} Auto-Toot.");
+	        if (_isActive == value) return;
 
-		        if (_isActive) WasAutoUsed = true;
+	        if (value)
+	        {
+		        SetupBot();
+		        WasAutoUsed = true;
 	        }
+
+	        _isActive = value;
+	        Logger.LogInfo($"{(_isActive ? "Enabled" : "Disabled")} Auto-Toot.");
         }
     }
 
-    public static void ToggleActive()
-    {
-        IsActive = !_isActive;
-    }
-    
     public static bool WasAutoUsed { get; private set; }
     
-    public static Bot Bot { get; internal set; }
+    public static Bot Bot { get; private set; }
     
     internal new static ManualLogSource Logger { get; private set; }
 
@@ -101,4 +125,5 @@ public class Plugin : BaseUnityPlugin
     private static bool _isInGameplay;
     
     private const string GameplaySceneName = "gameplay";
+    private const string GameControllerPath = "GameController";
 }
