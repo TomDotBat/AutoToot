@@ -43,10 +43,10 @@ public class Bot
         _gameController = gameController;
         _humanPuppetController = gameController.puppet_humanc;
 
-        _noteHolder = GameObject.Find(NotesHolderPath)?.GetComponent<RectTransform>();
+        _noteHolderPosition = GameObject.Find(NotesHolderPath)?.GetComponent<RectTransform>();
         _pointer = GameObject.Find(CursorPath)?.GetComponent<RectTransform>();
 
-        if (_noteHolder == null || _pointer == null)
+        if (_noteHolderPosition == null || _pointer == null)
         {
             Logger.LogError("Unable to locate the NotesHolder and Pointer, Auto-Toot cannot function.");
             Plugin.IsActive = false;
@@ -59,72 +59,92 @@ public class Bot
 
     public void Update()
     {
-        if (_gameController.currentnoteindex < 0)
-            return;
+	    if (_gameController.currentnoteindex > -1)
+	    {
+		    float currentTime = GetTime();
+    
+		    float noteStartTime = _gameController.currentnotestart - EarlyStart;
+		    float noteEndTime = _gameController.currentnoteend + LateFinish;
 
-        //The following code determines where the pointer should be based on decompiled code
-        float zeroXPos = 60f;
-        float noteHolderXPos = _noteHolder.anchoredPosition3D.x - zeroXPos;
-        float time = noteHolderXPos <= 0.0 ? Mathf.Abs(noteHolderXPos) : -1f;
+		    float pointerY = GetPointerY(currentTime, noteStartTime, noteEndTime);
 
-        float noteStartTime = _gameController.currentnotestart - EarlyStart;
-        float noteEndTime = _gameController.currentnoteend + LateFinish;
+		    Vector2 pointerPosition = _pointer.anchoredPosition;
+		    pointerPosition.y = pointerY;
+		    _pointer.anchoredPosition = pointerPosition;
 
-        //Handle whether or not we should be tooting
-        bool shouldToot = !_gameController.outofbreath
-                          && time >= noteStartTime
-                          && time <= noteEndTime;
+		    HandleTooting(pointerY, currentTime, noteStartTime, noteEndTime);
+		    _humanPuppetController.doPuppetControl(-pointerY / GameCanvasSize * 2);
+	    }
+    }
 
-        Vector2 pointerPosition = _pointer.anchoredPosition;
+    private float GetTime()
+    {
+        float noteHolderX = _noteHolderPosition.anchoredPosition3D.x - NotesHolderZeroOffset;
+        return noteHolderX <= 0f ? Mathf.Abs(noteHolderX) : -1f;
+    }
 
-        if (_gameController.noteplaying)
-        {
-            pointerPosition.y = _gameController.currentnotestarty + _gameController.easeInOutVal(
-                Mathf.Abs(1f - (noteEndTime - time) / (noteEndTime - noteStartTime)),
-                0.0f, _gameController.currentnotepshift, 1f
-            );
-        }
-        else
-        {
-            float progressToNextNote = 1f - (noteStartTime - time) / (noteStartTime - _lastNoteEndTime);
-            pointerPosition.y = Mathf.Lerp( _lastNoteEndY, _gameController.currentnotestarty, progressToNextNote);
-        }
+    private float GetPointerY(float currentTime, float noteStartTime, float noteEndTime)
+    {
+	    if (_gameController.noteplaying)
+	    {
+		    return _gameController.currentnotestarty + _gameController.easeInOutVal(
+			    Mathf.Abs(1f - (noteEndTime - currentTime) / (noteEndTime - noteStartTime)),
+			    0f, _gameController.currentnotepshift, 1f
+		    );
+	    }
 
-        if (!_gameController.noteplaying && shouldToot)
-        {
-            _gameController.setPuppetShake(true);
-            _gameController.playNote();
-            _gameController.noteplaying = true;
+	    return Mathf.Lerp( _lastNoteEndY, _gameController.currentnotestarty, 
+		    1f - (noteStartTime - currentTime) / (noteStartTime - _lastNoteEndTime));
+	}
 
-            _lastNoteEndTime = noteEndTime;
-            _lastNoteEndY = _gameController.currentnoteendy;
-        }
-        else if (_gameController.noteplaying && !shouldToot)
-        {
-            _gameController.setPuppetShake(false);
-            _gameController.stopNote();
-            _gameController.noteplaying = false;
-        }
+    private bool ShouldToot(float currentTime, float noteStartTime, float noteEndTime)
+    {
+	    return !_gameController.outofbreath
+	           && currentTime >= noteStartTime
+	           && currentTime <= noteEndTime;
+    }
 
-        _pointer.anchoredPosition = pointerPosition;
-        _humanPuppetController.doPuppetControl(-pointerPosition.y / GameCanvasSize * 2);
+    private void OnTootStateChange(bool isTooting)
+    {
+	    _gameController.setPuppetShake(isTooting);
+	    _gameController.noteplaying = isTooting;
+
+	    if (isTooting) _gameController.playNote();
+	    else _gameController.stopNote();
+    }
+
+    private void HandleTooting(float pointerY, float currentTime, float noteStartTime, float noteEndTime)
+    {
+	    bool shouldToot = ShouldToot(currentTime, noteStartTime, noteEndTime);
+
+	    if (!_gameController.noteplaying && shouldToot)
+	    {
+		    OnTootStateChange(true);
+		    _lastNoteEndTime = noteEndTime;
+		    _lastNoteEndY = pointerY;
+	    }
+	    else if (_gameController.noteplaying && !shouldToot)
+	    {
+		    OnTootStateChange(false);
+	    }
     }
 
     private ManualLogSource Logger => Plugin.Logger;
 
+    private float _lastNoteEndTime;
+    private float _lastNoteEndY;
+
     private readonly GameController _gameController;
     private readonly HumanPuppetController _humanPuppetController;
-    private readonly RectTransform _noteHolder;
+    private readonly RectTransform _noteHolderPosition;
     private readonly RectTransform _pointer;
 
     private const int EarlyStart = 8;
     private const int LateFinish = 8;
 
     private const float GameCanvasSize = 450f;
-
-    private float _lastNoteEndTime;
-    private float _lastNoteEndY;
-
+    private const float NotesHolderZeroOffset = 60f;
+    
     private const string NotesHolderPath = "GameplayCanvas/GameSpace/NotesHolder";
     private const string CursorPath = "GameplayCanvas/GameSpace/TargetNote";
 }
