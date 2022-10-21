@@ -40,12 +40,14 @@ public class Plugin : BaseUnityPlugin
 {
     private void Awake()
     {
-        Logger = base.Logger;
+	    Logger = base.Logger;
         Logger.LogInfo($"Loaded {PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION}.");
 
+        Configuration = new Configuration(Config);
+        
         Harmony harmony = new Harmony(PluginInfo.PLUGIN_GUID);
         harmony.PatchAll();
-        
+
         SceneManager.sceneLoaded += OnSceneLoaded;
         Logger.LogDebug("Added sceneLoaded delegate.");
     }
@@ -116,6 +118,7 @@ public class Plugin : BaseUnityPlugin
     public static bool WasAutoUsed { get; private set; }
     
     public static Bot Bot { get; private set; }
+    public static Configuration Configuration { get; private set; }
     
     internal new static ManualLogSource Logger { get; private set; }
 

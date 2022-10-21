@@ -55,6 +55,9 @@ public class Bot
         {
             Logger.LogDebug("Located NotesHolder and Pointer.");
         }
+
+        _earlyStart = Plugin.Configuration.EarlyStart.Value;
+        _lateFinish = Plugin.Configuration.LateFinish.Value;
     }
 
     public void Update()
@@ -63,16 +66,17 @@ public class Bot
 	    {
 		    float currentTime = GetTime();
     
-		    float noteStartTime = _gameController.currentnotestart - EarlyStart;
-		    float noteEndTime = _gameController.currentnoteend + LateFinish;
+		    float noteStartTime = _gameController.currentnotestart - _earlyStart;
+		    float noteEndTime = _gameController.currentnoteend + _lateFinish;
 
+		    HandleTooting(currentTime, noteStartTime, noteEndTime);
+		    
 		    float pointerY = GetPointerY(currentTime, noteStartTime, noteEndTime);
-
+		    
 		    Vector2 pointerPosition = _pointer.anchoredPosition;
 		    pointerPosition.y = pointerY;
 		    _pointer.anchoredPosition = pointerPosition;
 
-		    HandleTooting(pointerY, currentTime, noteStartTime, noteEndTime);
 		    _humanPuppetController.doPuppetControl(-pointerY / GameCanvasSize * 2);
 	    }
     }
@@ -92,9 +96,14 @@ public class Bot
 			    0f, _gameController.currentnotepshift, 1f
 		    );
 	    }
+	    
 
-	    return Mathf.Lerp( _lastNoteEndY, _gameController.currentnotestarty, 
+	    float res = Mathf.Lerp(_lastNoteEndY, _gameController.currentnotestarty,
 		    1f - (noteStartTime - currentTime) / (noteStartTime - _lastNoteEndTime));
+	    
+	    Logger.LogDebug($"Lerp({_lastNoteEndY}, {_gameController.currentnotestarty}, {1f - (noteStartTime - currentTime) / (noteStartTime - _lastNoteEndTime)}) = {res}");
+
+	    return res;
 	}
 
     private bool ShouldToot(float currentTime, float noteStartTime, float noteEndTime)
@@ -113,19 +122,19 @@ public class Bot
 	    else _gameController.stopNote();
     }
 
-    private void HandleTooting(float pointerY, float currentTime, float noteStartTime, float noteEndTime)
+    private void HandleTooting(float currentTime, float noteStartTime, float noteEndTime)
     {
 	    bool shouldToot = ShouldToot(currentTime, noteStartTime, noteEndTime);
 
 	    if (!_gameController.noteplaying && shouldToot)
 	    {
 		    OnTootStateChange(true);
-		    _lastNoteEndTime = noteEndTime;
-		    _lastNoteEndY = pointerY;
 	    }
 	    else if (_gameController.noteplaying && !shouldToot)
 	    {
 		    OnTootStateChange(false);
+		    _lastNoteEndTime = currentTime;
+		    _lastNoteEndY = _pointer.anchoredPosition.y;
 	    }
     }
 
@@ -139,8 +148,8 @@ public class Bot
     private readonly RectTransform _noteHolderPosition;
     private readonly RectTransform _pointer;
 
-    private const int EarlyStart = 8;
-    private const int LateFinish = 8;
+    private readonly int _earlyStart;
+    private readonly int _lateFinish;
 
     private const float GameCanvasSize = 450f;
     private const float NotesHolderZeroOffset = 60f;
