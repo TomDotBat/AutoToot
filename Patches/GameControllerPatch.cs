@@ -36,7 +36,7 @@ using UnityEngine;
 
 namespace AutoToot.Patches;
 
-[HarmonyPatch(typeof(GameController), "Start")]
+[HarmonyPatch(typeof(GameController), nameof(GameController.Start))]
 internal class GameControllerStartPatch
 {
 	static void Postfix()
