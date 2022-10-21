@@ -27,6 +27,8 @@
 	Created: 21st October 2022
 */
 
+using System;
+using System.Reflection;
 using AutoToot.Helpers;
 using BepInEx.Configuration;
 
@@ -34,46 +36,62 @@ namespace AutoToot;
 
 public class Configuration
 {
-    internal Configuration(ConfigFile configFile)
-    {
-        Plugin.Logger.LogInfo($"Loading config...");
-        
-        EaseFunction = configFile.Bind("Interpolation", "EaseFunction", DefaultEasingFunction,
-	        "The easing function to use for animating pointer position between notes.");
+	internal Configuration(ConfigFile configFile)
+	{
+		Plugin.Logger.LogInfo($"Loading config...");
 
-        EarlyStart = configFile.Bind("Timing", "EarlyStart", DefaultEarlyStart,
-            "Starts playing notes earlier by the given duration.");
+		EaseFunction = configFile.Bind("Interpolation", "EaseFunction", DefaultEasingFunction,
+			"The easing function to use for animating pointer position between notes."
+			+ $"\nValid easing functions are: {String.Join(", ", GetValidEasingTypes())}.");
 
-        LateFinish = configFile.Bind("Timing", "LateFinish", DefaultLateFinish,
-            "Finishes notes later by the given duration.");
-    }
+		EarlyStart = configFile.Bind("Timing", "EarlyStart", DefaultEarlyStart,
+			"Starts playing notes earlier by the given duration.");
 
-    public void Validate()
-    {
-	    if (typeof(Easing).GetMethod(EaseFunction.Value) == null)
-	    {
-		    Plugin.Logger.LogWarning($"Easing function '{EaseFunction.Value}' does not exist, falling back to '{DefaultEasingFunction}'");
-		    EaseFunction.Value = DefaultEasingFunction;
-	    }
+		LateFinish = configFile.Bind("Timing", "LateFinish", DefaultLateFinish,
+			"Finishes notes later by the given duration.");
+	}
 
-	    if (EarlyStart.Value < 0)
-	    {
-		    Plugin.Logger.LogWarning($"Early start time is less than zero, falling back to {DefaultEarlyStart}");
-		    EarlyStart.Value = DefaultEarlyStart;
-	    }
+	public void Validate()
+	{
+		if (typeof(Easing).GetMethod(EaseFunction.Value) == null)
+		{
+			Plugin.Logger.LogWarning(
+				$"Easing function '{EaseFunction.Value}' does not exist, falling back to '{DefaultEasingFunction}'."
+				+ $"\nValid easing functions are: {String.Join(", ", GetValidEasingTypes())}.");
+			EaseFunction.Value = DefaultEasingFunction;
+		}
 
-	    if (LateFinish.Value < 0)
-	    {
-		    Plugin.Logger.LogWarning($"Late finish time is less than zero, falling back to {DefaultLateFinish}");
-		    EarlyStart.Value = DefaultLateFinish;
-	    }
-    }
-    
+		if (EarlyStart.Value < 0)
+		{
+			Plugin.Logger.LogWarning($"Early start time is less than zero, falling back to {DefaultEarlyStart}.");
+			EarlyStart.Value = DefaultEarlyStart;
+		}
+
+		if (LateFinish.Value < 0)
+		{
+			Plugin.Logger.LogWarning($"Late finish time is less than zero, falling back to {DefaultLateFinish}.");
+			EarlyStart.Value = DefaultLateFinish;
+		}
+	}
+
+	private string[] GetValidEasingTypes()
+	{
+		MethodInfo[] methods = typeof(Easing).GetMethods();
+
+		int methodCount = methods.Length - 4; //Last 4 methods are derived from object
+		string[] types = new string[methodCount];
+
+		for (int i = 0; i < methodCount; i++)
+			types[i] = methods[i].Name;
+
+		return types;
+	}
+
 	public ConfigEntry<string> EaseFunction { get; }
 	public ConfigEntry<int> EarlyStart { get; }
-    public ConfigEntry<int> LateFinish { get; }
-    
-    private const string DefaultEasingFunction = "Linear";
-    private const int DefaultEarlyStart = 8;
-    private const int DefaultLateFinish= 8;
+	public ConfigEntry<int> LateFinish { get; }
+
+	private const string DefaultEasingFunction = "Linear";
+	private const int DefaultEarlyStart = 8;
+	private const int DefaultLateFinish = 8;
 }

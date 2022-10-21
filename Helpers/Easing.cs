@@ -31,7 +31,7 @@ using System;
 
 namespace AutoToot.Helpers;
 
-internal class Easing //https://gist.github.com/Kryzarel/bba64622057f21a1d6d44879f9cd7bd4
+internal static class Easing //https://gist.github.com/Kryzarel/bba64622057f21a1d6d44879f9cd7bd4
 {
     public static float Linear(float t) => t;
 
