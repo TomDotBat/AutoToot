@@ -96,14 +96,9 @@ public class Bot
 			    0f, _gameController.currentnotepshift, 1f
 		    );
 	    }
-	    
 
-	    float res = Mathf.Lerp(_lastNoteEndY, _gameController.currentnotestarty,
+	    return Mathf.Lerp(_lastNoteEndY, _gameController.currentnotestarty,
 		    1f - (noteStartTime - currentTime) / (noteStartTime - _lastNoteEndTime));
-	    
-	    Logger.LogDebug($"Lerp({_lastNoteEndY}, {_gameController.currentnotestarty}, {1f - (noteStartTime - currentTime) / (noteStartTime - _lastNoteEndTime)}) = {res}");
-
-	    return res;
 	}
 
     private bool ShouldToot(float currentTime, float noteStartTime, float noteEndTime)
