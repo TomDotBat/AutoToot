@@ -75,7 +75,7 @@ internal class GameControllerUpdatePatch
         if (__instance.freeplay || __instance.paused)
             return true;
 
-        if (Input.GetKeyDown(KeyCode.F8))
+        if (Input.GetKeyDown(Plugin.Configuration.ToggleKey.Value))
             Plugin.ToggleActive();
         
         __instance.controllermode = Plugin.IsActive; //Disables user input for us, nice shortcut!!

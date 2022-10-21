@@ -31,6 +31,7 @@ using System;
 using System.Reflection;
 using AutoToot.Helpers;
 using BepInEx.Configuration;
+using UnityEngine;
 
 namespace AutoToot;
 
@@ -39,6 +40,9 @@ public class Configuration
 	internal Configuration(ConfigFile configFile)
 	{
 		Plugin.Logger.LogInfo($"Loading config...");
+
+		ToggleKey = configFile.Bind("Keybinds", "ToggleKey", DefaultToggleKey,
+			"The key used to toggle AutoToot on and off.");
 
 		EaseFunction = configFile.Bind("Interpolation", "EaseFunction", DefaultEasingFunction,
 			"The easing function to use for animating pointer position between notes."
@@ -88,10 +92,12 @@ public class Configuration
 		return types;
 	}
 
+	public ConfigEntry<KeyCode> ToggleKey { get; }
 	public ConfigEntry<string> EaseFunction { get; }
 	public ConfigEntry<int> EarlyStart { get; }
 	public ConfigEntry<int> LateFinish { get; }
 
+	private const KeyCode DefaultToggleKey = KeyCode.F8;
 	private const string DefaultEasingFunction = "Linear";
 	private const int DefaultEarlyStart = 8;
 	private const int DefaultLateFinish = 8;
