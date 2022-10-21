@@ -42,7 +42,8 @@ public class Configuration
 
 		EaseFunction = configFile.Bind("Interpolation", "EaseFunction", DefaultEasingFunction,
 			"The easing function to use for animating pointer position between notes."
-			+ $"\nValid easing functions are: {String.Join(", ", GetValidEasingTypes())}.");
+			+ $"\nValid easing functions are: {String.Join(", ", GetValidEasingTypes())}."
+			+ "\nPreview easing functions at: https://easings.net/");
 
 		EarlyStart = configFile.Bind("Timing", "EarlyStart", DefaultEarlyStart,
 			"Starts playing notes earlier by the given duration.");
