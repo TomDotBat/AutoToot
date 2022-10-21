@@ -79,7 +79,7 @@ public class Bot
 
         if (_gameController.noteplaying)
         {
-            pointerPosition.y = _gameController.currentnotestarty + EaseInOutVal(
+            pointerPosition.y = _gameController.currentnotestarty + _gameController.easeInOutVal(
                 Mathf.Abs(1f - (noteEndTime - time) / (noteEndTime - noteStartTime)),
                 0.0f, _gameController.currentnotepshift, 1f
             );
@@ -108,14 +108,6 @@ public class Bot
 
         _pointer.anchoredPosition = pointerPosition;
         _humanPuppetController.doPuppetControl(-pointerPosition.y / GameCanvasSize * 2);
-    }
-
-    private float EaseInOutVal(float t, float b, float c, float d) //Pasted from dotpeek
-    {
-        t /= d / 2f;
-        if (t < 1.0) return c / 2f * t * t + b;
-        --t;
-        return (float) (-(double) c / 2.0 * (t * (t - 2.0) - 1.0)) + b;
     }
 
     private ManualLogSource Logger => Plugin.Logger;
