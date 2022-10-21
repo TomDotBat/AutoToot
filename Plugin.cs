@@ -44,6 +44,7 @@ public class Plugin : BaseUnityPlugin
         Logger.LogInfo($"Loaded {PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION}.");
 
         Configuration = new Configuration(Config);
+        Configuration.Validate();
         
         Harmony harmony = new Harmony(PluginInfo.PLUGIN_GUID);
         harmony.PatchAll();

@@ -27,7 +27,9 @@
 	Created: 15th October 2022
 */
 
+using System.Reflection;
 using System.Security.Permissions;
+using AutoToot.Helpers;
 using BepInEx.Logging;
 using UnityEngine;
 
@@ -58,6 +60,7 @@ public class Bot
 
         _earlyStart = Plugin.Configuration.EarlyStart.Value;
         _lateFinish = Plugin.Configuration.LateFinish.Value;
+        _easeFunction = typeof(Easing).GetMethod(Plugin.Configuration.EaseFunction.Value);
     }
 
     public void Update()
@@ -87,6 +90,11 @@ public class Bot
         return noteHolderX <= 0f ? Mathf.Abs(noteHolderX) : -1f;
     }
 
+    private float Ease(float e)
+    {
+	    return (float) _easeFunction.Invoke(typeof(Easing), new object[] {e});
+    }
+
     private float GetPointerY(float currentTime, float noteStartTime, float noteEndTime)
     {
 	    if (_gameController.noteplaying)
@@ -98,7 +106,7 @@ public class Bot
 	    }
 
 	    return Mathf.Lerp(_lastNoteEndY, _gameController.currentnotestarty,
-		    1f - (noteStartTime - currentTime) / (noteStartTime - _lastNoteEndTime));
+		    Ease(1f - (noteStartTime - currentTime) / (noteStartTime - _lastNoteEndTime)));
 	}
 
     private bool ShouldToot(float currentTime, float noteStartTime, float noteEndTime)
@@ -145,6 +153,7 @@ public class Bot
 
     private readonly int _earlyStart;
     private readonly int _lateFinish;
+    private readonly MethodInfo _easeFunction;
 
     private const float GameCanvasSize = 450f;
     private const float NotesHolderZeroOffset = 60f;
