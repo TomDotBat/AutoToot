@@ -93,7 +93,7 @@ internal class PointSceneControllerDoCoinsPatch
         __instance.Invoke(nameof(PointSceneController.showContinue),  0.75f);
     }
 
-    private const string CoinPath = "Canvas/coins+continue/coingroup/coin";
-    private const string TootsTextPath = "Canvas/coins+continue/coingroup/Text";
+    private const string CoinPath = "Canvas/buttons/coingroup/coin";
+    private const string TootsTextPath = "Canvas/buttons/coingroup/Text";
     private const float TootsTextXPosition = -0.246f;
 }
