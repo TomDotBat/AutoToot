@@ -40,6 +40,7 @@ namespace AutoToot;
 
 public class Bot
 {
+    public bool isTooting = false;
     public Bot(GameController gameController)
     {
         _gameController = gameController;
@@ -72,7 +73,7 @@ public class Bot
 		    float noteStartTime = _gameController.currentnotestart - _earlyStart;
 		    float noteEndTime = _gameController.currentnoteend + _lateFinish;
 
-		    HandleTooting(currentTime, noteStartTime, noteEndTime);
+		    isTooting = ShouldToot(currentTime, noteStartTime, noteEndTime);
 		    
 		    float pointerY = GetPointerY(currentTime, noteStartTime, noteEndTime);
 		    
@@ -114,32 +115,7 @@ public class Bot
 	    return !_gameController.outofbreath
 	           && currentTime >= noteStartTime
 	           && currentTime <= noteEndTime;
-    }
-
-    private void OnTootStateChange(bool isTooting)
-    {
-	    _gameController.setPuppetShake(isTooting);
-	    _gameController.noteplaying = isTooting;
-
-	    if (isTooting) _gameController.playNote();
-	    else _gameController.stopNote();
-    }
-
-    private void HandleTooting(float currentTime, float noteStartTime, float noteEndTime)
-    {
-	    bool shouldToot = ShouldToot(currentTime, noteStartTime, noteEndTime);
-
-	    if (!_gameController.noteplaying && shouldToot)
-	    {
-		    OnTootStateChange(true);
-	    }
-	    else if (_gameController.noteplaying && !shouldToot)
-	    {
-		    OnTootStateChange(false);
-		    _lastNoteEndTime = currentTime;
-		    _lastNoteEndY = _pointer.anchoredPosition.y;
-	    }
-    }
+    }   
 
     private ManualLogSource Logger => Plugin.Logger;
 
