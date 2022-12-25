@@ -41,6 +41,7 @@ namespace AutoToot;
 public class Bot
 {
     public bool isTooting = false;
+
     public Bot(GameController gameController)
     {
         _gameController = gameController;
@@ -98,7 +99,7 @@ public class Bot
 
     private float GetPointerY(float currentTime, float noteStartTime, float noteEndTime)
     {
-	    if (_gameController.noteplaying)
+	    if (_gameController.isNoteButtonPressed())
 	    {
 		    return _gameController.currentnotestarty + _gameController.easeInOutVal(
 			    Mathf.Abs(1f - (noteEndTime - currentTime) / (noteEndTime - noteStartTime)),
