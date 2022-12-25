@@ -39,32 +39,32 @@ namespace AutoToot.Patches;
 [HarmonyPatch(typeof(GameController), nameof(GameController.Start))]
 internal class GameControllerStartPatch
 {
-	static void Postfix()
-	{
-		GameObject comboObject = GameObject.Find(ComboPath);
-		if (comboObject == null)
-		{
-			Plugin.Logger.LogError("Unable to find combo text, the auto toot indicator will not be present.");
-		}
-		else
-		{
-			GameObject autoIndicator = Object.Instantiate(comboObject, comboObject.transform);
-			autoIndicator.AddComponent<AutoIndicator>();
+    static void Postfix()
+    {
+        GameObject comboObject = GameObject.Find(ComboPath);
+        if (comboObject == null)
+        {
+            Plugin.Logger.LogError("Unable to find combo text, the auto toot indicator will not be present.");
+        }
+        else
+        {
+            GameObject autoIndicator = Object.Instantiate(comboObject, comboObject.transform);
+            autoIndicator.AddComponent<AutoIndicator>();
 
-			GameObject parent = GameObject.Find(ParentPath);
-			if (parent == null)
-			{
-				Plugin.Logger.LogError("Unable to find the UIHolder to re-parent the indicator, placement may be wrong.");
-			}
-			else
-			{
-				autoIndicator.transform.parent = parent.transform;
-			}
-		}
-	}
+            GameObject parent = GameObject.Find(ParentPath);
+            if (parent == null)
+            {
+                Plugin.Logger.LogError("Unable to find the UIHolder to re-parent the indicator, placement may be wrong.");
+            }
+            else
+            {
+                autoIndicator.transform.parent = parent.transform;
+            }
+        }
+    }
 
-	private const string ComboPath = "GameplayCanvas/UIHolder/maxcombo/maxcombo_shadow";
-	private const string ParentPath = "GameplayCanvas/UIHolder";
+    private const string ComboPath = "GameplayCanvas/UIHolder/maxcombo/maxcombo_shadow";
+    private const string ParentPath = "GameplayCanvas/UIHolder";
 }
 
 [HarmonyPatch(typeof(GameController), nameof(GameController.Update))]
@@ -77,21 +77,31 @@ internal class GameControllerUpdatePatch
 
         if (Input.GetKeyDown(Plugin.Configuration.ToggleKey.Value))
             Plugin.ToggleActive();
-        
+
         __instance.controllermode = Plugin.IsActive; //Disables user input for us, nice shortcut!!
 
         if (Plugin.IsActive)
-	        Plugin.Bot.Update();
+            Plugin.Bot.Update();
 
         return true;
+    }
+}
+
+[HarmonyPatch(typeof(GameController), nameof(GameController.isNoteButtonPressed))]
+internal class GameControllerIsNoteButtonPressedPatch //You can redo the structure if you want
+{
+    static void Postfix(ref bool __result)
+    {
+        if (Plugin.IsActive)
+            __result = Plugin.Bot.isTooting;
     }
 }
 
 [HarmonyPatch(typeof(GameController), nameof(GameController.pauseRetryLevel))]
 internal class GameControllerRetryPatch
 {
-	static void Postfix(GameController __instance)
-	{
-		if (Plugin.IsActive) Plugin.IsActive = false;
-	}
+    static void Postfix(GameController __instance)
+    {
+        if (Plugin.IsActive) Plugin.IsActive = false;
+    }
 }

@@ -40,6 +40,8 @@ namespace AutoToot;
 
 public class Bot
 {
+    public bool isTooting = false;
+
     public Bot(GameController gameController)
     {
         _gameController = gameController;
@@ -68,13 +70,21 @@ public class Bot
 	    if (_gameController.currentnoteindex > -1)
 	    {
 		    float currentTime = GetTime();
-    
-		    float noteStartTime = _gameController.currentnotestart - _earlyStart;
-		    float noteEndTime = _gameController.currentnoteend + _lateFinish;
 
-		    HandleTooting(currentTime, noteStartTime, noteEndTime);
-		    
-		    float pointerY = GetPointerY(currentTime, noteStartTime, noteEndTime);
+            
+
+            _currentNoteStartTime = _gameController.currentnotestart - _earlyStart;
+		    _currentNoteEndTime = _gameController.currentnoteend + _lateFinish;
+
+		    isTooting = ShouldToot(currentTime, _currentNoteStartTime, _currentNoteEndTime);
+
+            if (isTooting)
+            {
+                _lastNoteEndTime = currentTime + _lateFinish;
+                _lastNoteEndY = _pointer.anchoredPosition.y;
+            }
+
+            float pointerY = GetPointerY(currentTime, _currentNoteStartTime, _currentNoteEndTime);
 		    
 		    Vector2 pointerPosition = _pointer.anchoredPosition;
 		    pointerPosition.y = pointerY;
@@ -97,7 +107,7 @@ public class Bot
 
     private float GetPointerY(float currentTime, float noteStartTime, float noteEndTime)
     {
-	    if (_gameController.noteplaying)
+	    if (ShouldToot(currentTime, noteStartTime, noteEndTime))
 	    {
 		    return _gameController.currentnotestarty + _gameController.easeInOutVal(
 			    Mathf.Abs(1f - (noteEndTime - currentTime) / (noteEndTime - noteStartTime)),
@@ -105,7 +115,10 @@ public class Bot
 		    );
 	    }
 
-	    return Mathf.Lerp(_lastNoteEndY, _gameController.currentnotestarty,
+        Plugin.Logger.LogInfo("ease: " + (1f - (noteStartTime - currentTime) / (noteStartTime - _lastNoteEndTime)));
+
+
+        return Mathf.Lerp(_lastNoteEndY, _gameController.currentnotestarty,
 		    Ease(1f - (noteStartTime - currentTime) / (noteStartTime - _lastNoteEndTime)));
 	}
 
@@ -114,37 +127,14 @@ public class Bot
 	    return !_gameController.outofbreath
 	           && currentTime >= noteStartTime
 	           && currentTime <= noteEndTime;
-    }
-
-    private void OnTootStateChange(bool isTooting)
-    {
-	    _gameController.setPuppetShake(isTooting);
-	    _gameController.noteplaying = isTooting;
-
-	    if (isTooting) _gameController.playNote();
-	    else _gameController.stopNote();
-    }
-
-    private void HandleTooting(float currentTime, float noteStartTime, float noteEndTime)
-    {
-	    bool shouldToot = ShouldToot(currentTime, noteStartTime, noteEndTime);
-
-	    if (!_gameController.noteplaying && shouldToot)
-	    {
-		    OnTootStateChange(true);
-	    }
-	    else if (_gameController.noteplaying && !shouldToot)
-	    {
-		    OnTootStateChange(false);
-		    _lastNoteEndTime = currentTime;
-		    _lastNoteEndY = _pointer.anchoredPosition.y;
-	    }
-    }
+    }   
 
     private ManualLogSource Logger => Plugin.Logger;
 
     private float _lastNoteEndTime;
     private float _lastNoteEndY;
+    private float _currentNoteStartTime;
+    private float _currentNoteEndTime;
 
     private readonly GameController _gameController;
     private readonly HumanPuppetController _humanPuppetController;
