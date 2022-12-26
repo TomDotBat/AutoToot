@@ -115,9 +115,6 @@ public class Bot
 		    );
 	    }
 
-        Plugin.Logger.LogInfo("ease: " + (1f - (noteStartTime - currentTime) / (noteStartTime - _lastNoteEndTime)));
-
-
         return Mathf.Lerp(_lastNoteEndY, _gameController.currentnotestarty,
 		    Ease(1f - (noteStartTime - currentTime) / (noteStartTime - _lastNoteEndTime)));
 	}
