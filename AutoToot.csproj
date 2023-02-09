@@ -9,7 +9,8 @@
         <PackageId>Tom.AutoToot</PackageId>
         <Title>AutoToot</Title>
         <Authors>Tom.</Authors>
-        <TromboneChampDir>C:\Program Files (x86)\Steam\steamapps\common\TromboneChamp</TromboneChampDir>
+		<TromboneTootDir>C:\Users\Sabz\AppData\Roaming\r2modmanPlus-local\TromboneChamp\profiles\Default</TromboneTootDir>
+		<TromboneChampDir>E:\SteamLibrary\steamapps\common\TromboneChamp</TromboneChampDir>
     </PropertyGroup>
 
     <ItemGroup>
@@ -44,6 +45,6 @@
     </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(TromboneChampDir)/BepInEx/plugins" />
+	  <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(TromboneTootDir)/BepInEx/plugins/TomDot-AutoToot" />
   </Target>
 </Project>
