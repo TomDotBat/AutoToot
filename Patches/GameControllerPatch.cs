@@ -84,7 +84,10 @@ internal class GameControllerUpdatePatch
         {
             Plugin.Bot.Update();
             if (Plugin.Bot.shouldPlayPerfect)
+            {
                 __instance.released_button_between_notes = true; // no need to release toot between notes because some pepega maps have 2 notes on the same frame
+                __instance.breathcounter = 0f;
+            }
         }
     }
 }
