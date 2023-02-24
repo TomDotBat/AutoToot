@@ -3,7 +3,7 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <AssemblyName>AutoToot</AssemblyName>
         <Description>Auto play for Trombone Champ.</Description>
-        <Version>1.2.0</Version>
+        <Version>1.2.4</Version>
         <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
         <LangVersion>latest</LangVersion>
         <PackageId>Tom.AutoToot</PackageId>
