@@ -40,8 +40,8 @@ namespace AutoToot;
 
 public class Bot
 {
-    public bool isTooting = false;
-    public bool shouldPlayPerfect;
+    public bool IsTooting { get; set; }
+    public bool IsPerfectPlay { get; set };
 
     public Bot(GameController gameController)
     {
@@ -64,7 +64,7 @@ public class Bot
         _earlyStart = Plugin.Configuration.EarlyStart.Value;
         _lateFinish = Plugin.Configuration.LateFinish.Value;
         _easeFunction = typeof(Easing).GetMethod(Plugin.Configuration.EaseFunction.Value);
-        shouldPlayPerfect = Plugin.Configuration.PerfectScore.Value;
+        IsPerfectPlay = Plugin.Configuration.PerfectScore.Value;
     }
 
     public void Update()
@@ -80,9 +80,9 @@ public class Bot
             _currentNoteStartTime = _gameController.currentnotestart - _earlyStart;
             _currentNoteEndTime = _gameController.currentnoteend + _lateFinish;
 
-            isTooting = ShouldToot(currentTime, _currentNoteStartTime, _currentNoteEndTime);
+            IsTooting = ShouldToot(currentTime, _currentNoteStartTime, _currentNoteEndTime);
 
-            if (isTooting)
+            if (IsTooting)
             {
                 _lastNoteEndTime = currentTime + _lateFinish;
                 _lastNoteEndY = _pointer.anchoredPosition.y;
