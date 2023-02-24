@@ -54,6 +54,9 @@ public class Configuration
 
 		LateFinish = configFile.Bind("Timing", "LateFinish", DefaultLateFinish,
 			"Finishes notes later by the given duration.");
+
+		PerfectScore = configFile.Bind("Score", "PerfectScore", false,
+			"Cheat the score returned by notes to achieve a perfect score.");
 	}
 
 	public void Validate()
@@ -96,6 +99,7 @@ public class Configuration
 	public ConfigEntry<string> EaseFunction { get; }
 	public ConfigEntry<int> EarlyStart { get; }
 	public ConfigEntry<int> LateFinish { get; }
+	public ConfigEntry<bool> PerfectScore { get; }
 
 	private const KeyCode DefaultToggleKey = KeyCode.F8;
 	private const string DefaultEasingFunction = "Linear";

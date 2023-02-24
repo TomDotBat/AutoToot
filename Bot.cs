@@ -41,6 +41,7 @@ namespace AutoToot;
 public class Bot
 {
     public bool isTooting = false;
+    public bool shouldPlayPerfect;
 
     public Bot(GameController gameController)
     {
@@ -63,20 +64,23 @@ public class Bot
         _earlyStart = Plugin.Configuration.EarlyStart.Value;
         _lateFinish = Plugin.Configuration.LateFinish.Value;
         _easeFunction = typeof(Easing).GetMethod(Plugin.Configuration.EaseFunction.Value);
+        shouldPlayPerfect = Plugin.Configuration.PerfectScore.Value;
     }
 
     public void Update()
     {
-	    if (_gameController.currentnoteindex > -1)
-	    {
-		    float currentTime = GetTime();
+        if (_gameController.currentnoteindex > -1)
+        {
+            float currentTime = GetTime();
 
-            
+
+            if (_currentNoteEndTime >= _gameController.currentnotestart)
+                _gameController.released_button_between_notes = true;
 
             _currentNoteStartTime = _gameController.currentnotestart - _earlyStart;
-		    _currentNoteEndTime = _gameController.currentnoteend + _lateFinish;
+            _currentNoteEndTime = _gameController.currentnoteend + _lateFinish;
 
-		    isTooting = ShouldToot(currentTime, _currentNoteStartTime, _currentNoteEndTime);
+            isTooting = ShouldToot(currentTime, _currentNoteStartTime, _currentNoteEndTime);
 
             if (isTooting)
             {
@@ -85,13 +89,13 @@ public class Bot
             }
 
             float pointerY = GetPointerY(currentTime, _currentNoteStartTime, _currentNoteEndTime);
-		    
-		    Vector2 pointerPosition = _pointer.anchoredPosition;
-		    pointerPosition.y = pointerY;
-		    _pointer.anchoredPosition = pointerPosition;
 
-		    _humanPuppetController.doPuppetControl(-pointerY / GameCanvasSize * 2);
-	    }
+            Vector2 pointerPosition = _pointer.anchoredPosition;
+            pointerPosition.y = pointerY;
+            _pointer.anchoredPosition = pointerPosition;
+
+            _humanPuppetController.doPuppetControl(-pointerY / GameCanvasSize * 2);
+        }
     }
 
     private float GetTime()
@@ -102,29 +106,29 @@ public class Bot
 
     private float Ease(float e)
     {
-	    return (float) _easeFunction.Invoke(typeof(Easing), new object[] {e});
+        return (float)_easeFunction.Invoke(typeof(Easing), new object[] { e });
     }
 
     private float GetPointerY(float currentTime, float noteStartTime, float noteEndTime)
     {
-	    if (ShouldToot(currentTime, noteStartTime, noteEndTime))
-	    {
-		    return _gameController.currentnotestarty + _gameController.easeInOutVal(
-			    Mathf.Abs(1f - (noteEndTime - currentTime) / (noteEndTime - noteStartTime)),
-			    0f, _gameController.currentnotepshift, 1f
-		    );
-	    }
+        if (ShouldToot(currentTime, noteStartTime, noteEndTime))
+        {
+            return _gameController.currentnotestarty + _gameController.easeInOutVal(
+                Mathf.Abs(1f - ((noteEndTime - _lateFinish) - currentTime) / ((noteEndTime - _lateFinish) - (noteStartTime + _earlyStart))),
+                0f, _gameController.currentnotepshift, 1f
+            );
+        }
 
         return Mathf.Lerp(_lastNoteEndY, _gameController.currentnotestarty,
-		    Ease(1f - (noteStartTime - currentTime) / (noteStartTime - _lastNoteEndTime)));
-	}
+            Ease(1f - (noteStartTime - currentTime) / (noteStartTime - _lastNoteEndTime)));
+    }
 
     private bool ShouldToot(float currentTime, float noteStartTime, float noteEndTime)
     {
-	    return !_gameController.outofbreath
-	           && currentTime >= noteStartTime
-	           && currentTime <= noteEndTime;
-    }   
+        return !_gameController.outofbreath
+               && currentTime >= noteStartTime
+               && currentTime <= noteEndTime;
+    }
 
     private ManualLogSource Logger => Plugin.Logger;
 
@@ -144,7 +148,7 @@ public class Bot
 
     private const float GameCanvasSize = 450f;
     private const float NotesHolderZeroOffset = 60f;
-    
+
     private const string NotesHolderPath = "GameplayCanvas/GameSpace/NotesHolder";
     private const string CursorPath = "GameplayCanvas/GameSpace/TargetNote";
 }
