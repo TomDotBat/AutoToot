@@ -40,7 +40,7 @@ namespace AutoToot;
 
 public class Bot
 {
-    public bool IsTooting { get; set; }
+    public bool IsTooting { get; private set; }
     public bool IsPerfectPlay { get; }
 
     public Bot(GameController gameController)
