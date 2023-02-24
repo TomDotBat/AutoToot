@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoToot", "AutoToot.csproj", "{B186DEC2-BE42-4D8C-B3E3-42365536B6CF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoToot", "AutoToot\AutoToot.csproj", "{B186DEC2-BE42-4D8C-B3E3-42365536B6CF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
