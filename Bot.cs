@@ -111,7 +111,7 @@ public class Bot
 
     private float GetPointerY(float currentTime, float noteStartTime, float noteEndTime)
     {
-        if (ShouldToot(currentTime, noteStartTime + _earlyStart, noteEndTime - _lateFinish))
+        if (ShouldToot(currentTime, noteStartTime, noteEndTime))
         {
             return _gameController.currentnotestarty + _gameController.easeInOutVal(
                 Mathf.Abs(1f - ((noteEndTime - _lateFinish) - currentTime) / ((noteEndTime - _lateFinish) - (noteStartTime + _earlyStart))),
