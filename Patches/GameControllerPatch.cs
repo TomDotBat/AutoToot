@@ -127,7 +127,6 @@ internal class GameControllerDoScoreTextPatch
     }
 }
 
-
 [HarmonyPatch(typeof(GameController), nameof(GameController.pauseRetryLevel))]
 internal class GameControllerRetryPatch
 {
