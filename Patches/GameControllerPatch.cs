@@ -83,6 +83,7 @@ internal class GameControllerUpdatePatch
         if (Plugin.IsActive)
         {
             Plugin.Bot.Update();
+
             if (Plugin.Bot.IsPerfectPlay)
             {
                 __instance.released_button_between_notes = true; // no need to release toot between notes because some pepega maps have 2 notes on the same frame
@@ -126,6 +127,32 @@ internal class GameControllerDoScoreTextPatch
         }
     }
 }
+
+[HarmonyPatch(typeof(GameController), nameof(GameController.getScoreAverage))]
+internal class GameControllerGetScoreAveragePatch
+{
+    static void Prefix(GameController __instance)
+    {
+        if (Plugin.IsActive && Plugin.Bot.shouldPlayPerfect)
+        {
+            __instance.notescoreaverage = 100f;
+        }
+    }
+}
+
+[HarmonyPatch(typeof(GameController), nameof(GameController.doScoreText))]
+internal class GameControllerDoScoreTextPatch
+{
+    static void Prefix(object[] __args)
+    {
+        if (Plugin.IsActive && Plugin.Bot.shouldPlayPerfect)
+        {
+            __args[0] = 4; // note tally, 4 being perfect
+            __args[1] = 100f; // note score average just to make sure xd
+        }
+    }
+}
+
 
 [HarmonyPatch(typeof(GameController), nameof(GameController.pauseRetryLevel))]
 internal class GameControllerRetryPatch
