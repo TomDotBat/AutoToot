@@ -49,7 +49,7 @@ public class Bot
         _gameController = gameController;
         _humanPuppetController = gameController.puppet_humanc;
         _backgroundPuppetController = null;
-        _bg = GameObject.Find("_Background(Clone)");
+        _bg = gameController.bgcontroller.fullbgobject;
         if (_bg) {
             _backgroundPuppetController = _bg.GetComponent<BackgroundPuppetController>();
         }
