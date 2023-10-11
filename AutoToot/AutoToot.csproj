@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
+        <TargetFramework>net472</TargetFramework>
         <AssemblyName>AutoToot</AssemblyName>
         <Description>Auto play for Trombone Champ.</Description>
         <Version>1.2.4</Version>
@@ -23,24 +23,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Reference Include="0Harmony">
-            <HintPath>$(TromboneChampDir)\BepInEx\core\0Harmony.dll</HintPath>
-        </Reference>
-        <Reference Include="Assembly-CSharp">
-            <HintPath>$(TromboneChampDir)\TromboneChamp_Data\Managed\Assembly-CSharp-nstrip.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine">
-            <HintPath>$(TromboneChampDir)\TromboneChamp_Data\Managed\UnityEngine.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.CoreModule">
-            <HintPath>$(TromboneChampDir)\TromboneChamp_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.InputLegacyModule">
-            <HintPath>$(TromboneChampDir)\TromboneChamp_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.UI">
-            <HintPath>$(TromboneChampDir)\TromboneChamp_Data\Managed\UnityEngine.UI.dll</HintPath>
-        </Reference>
+        <PackageReference Include="TromboneChamp.GameLibs" Version="1.14.0" />
+        <PackageReference Include="TromboneChamp.TrombLoader" Version="2.1.0" />
     </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

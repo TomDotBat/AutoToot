@@ -400,3 +400,6 @@ FodyWeavers.xsd
 riderModule.iml
 /_ReSharper.Caches/
 .idea/
+
+# macOS metadata files
+.DS_Store
