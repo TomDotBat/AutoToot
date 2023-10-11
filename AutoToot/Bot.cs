@@ -32,6 +32,7 @@ using System.Security.Permissions;
 using AutoToot.Helpers;
 using BepInEx.Logging;
 using UnityEngine;
+using TrombLoader.Data;
 
 #pragma warning disable CS0618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -47,6 +48,11 @@ public class Bot
     {
         _gameController = gameController;
         _humanPuppetController = gameController.puppet_humanc;
+        _backgroundPuppetController = null;
+        _bg = GameObject.Find("_Background(Clone)");
+        if (_bg) {
+            _backgroundPuppetController = _bg.GetComponent<BackgroundPuppetController>();
+        }
 
         _noteHolderPosition = GameObject.Find(NotesHolderPath)?.GetComponent<RectTransform>();
         _pointer = GameObject.Find(CursorPath)?.GetComponent<RectTransform>();
@@ -95,6 +101,9 @@ public class Bot
             _pointer.anchoredPosition = pointerPosition;
 
             _humanPuppetController.doPuppetControl(-pointerY / GameCanvasSize * 2);
+            if (_backgroundPuppetController){
+                _backgroundPuppetController.DoPuppetControl(-pointerY / GameCanvasSize * 2, _gameController.vibratoamt);
+            }
         }
     }
 
@@ -139,6 +148,8 @@ public class Bot
 
     private readonly GameController _gameController;
     private readonly HumanPuppetController _humanPuppetController;
+    private readonly GameObject _bg;
+    private readonly BackgroundPuppetController _backgroundPuppetController;
     private readonly RectTransform _noteHolderPosition;
     private readonly RectTransform _pointer;
 
