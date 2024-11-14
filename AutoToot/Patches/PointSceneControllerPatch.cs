@@ -76,24 +76,11 @@ internal class PointSceneControllerDoCoinsPatch
 	        coin.SetActive(false);
         }
 
-        GameObject tootsObject = GameObject.Find(TootsTextPath);
-        if (tootsObject == null)
-        {
-	        Plugin.Logger.LogError("Unable to find toots text, AutoToot indicator will not be present.");
-        }
-        else
-        {
-	        __instance.tootstext.text = "AutoTooted Play";
-	        
-	        Vector3 textPosition = tootsObject.transform.position;
-	        textPosition.x = TootsTextXPosition;
-	        tootsObject.transform.position = textPosition;
-        }
-        
+        __instance.tootstext.text = "AutoTooted Play";
+
         __instance.Invoke(nameof(PointSceneController.showContinue),  0.75f);
     }
 
     private const string CoinPath = "Canvas/buttons/coingroup/coin";
-    private const string TootsTextPath = "Canvas/buttons/coingroup/Text";
     private const float TootsTextXPosition = -0.246f;
 }
